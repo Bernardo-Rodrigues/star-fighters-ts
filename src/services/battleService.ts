@@ -1,16 +1,10 @@
-import axios from "axios";
 import * as fightersRepository from "../repositories/fightersRepository.js"
+import checkUsersExistence from "../utils/checkUsersExistence.js";
+import getStars from "../utils/getStars.js";
 
 export async function doBattle(users: any){
-    const { data: firstUserRepos} = await axios.get(`https://api.github.com/users/${users.firstUser}/repos`)
-    const firstUserStars = firstUserRepos.reduce( (acc: any, cur: any) => acc + cur?.stargazers_count, 0)
-    const { data: secondUserRepos} = await axios.get(`https://api.github.com/users/${users.secondUser}/repos`)
-    const secondUserStars = secondUserRepos.reduce( (acc: any, cur: any) => acc + cur?.stargazers_count, 0)
-
-    const firstUserInfo = await fightersRepository.find("username", users.firstUser)
-    if(!firstUserInfo) fightersRepository.insert(users.firstUser)
-    const secondUserInfo = await fightersRepository.find("username", users.secondUser)
-    if(!secondUserInfo) fightersRepository.insert(users.secondUser)
+    const [ firstUserStars, secondUserStars ] = await getStars(users);
+    checkUsersExistence(users);
     
     if(firstUserStars > secondUserStars) {
         fightersRepository.update(users.firstUser, "wins")
@@ -37,8 +31,8 @@ export async function doBattle(users: any){
     fightersRepository.update(users.secondUser, "draws")
 
     return {
-        winner: "",
-        loser: "",
+        winner: null,
+        loser: null,
         draw: true
     }
 }

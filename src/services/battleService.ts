@@ -1,10 +1,13 @@
 import * as fightersRepository from "../repositories/fightersRepository.js"
-import checkUsersExistence from "../utils/checkUsersExistence.js";
 import getStars from "../utils/getStars.js";
 
 export async function doBattle(users: any){
     const [ firstUserStars, secondUserStars ] = await getStars(users);
-    checkUsersExistence(users);
+    
+    const firstUserInfo = await fightersRepository.find("username", users.firstUser)
+    if(!firstUserInfo) fightersRepository.insert(users.firstUser)
+    const secondUserInfo = await fightersRepository.find("username", users.secondUser)
+    if(!secondUserInfo) fightersRepository.insert(users.secondUser)
     
     if(firstUserStars > secondUserStars) {
         fightersRepository.update(users.firstUser, "wins")

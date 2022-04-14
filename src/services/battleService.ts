@@ -1,37 +1,38 @@
 import * as fightersRepository from "../repositories/fightersRepository.js"
-import getStars from "../utils/getStars.js";
+import getUserStars from "../utils/getUserStars.js";
 
-export async function doBattle(users: any){
-    const [ firstUserStars, secondUserStars ] = await getStars(users);
+export async function doBattle({firstUser, secondUser}){
+    const firstUserStars = await getUserStars(firstUser);
+    const secondUserStars = await getUserStars(secondUser);
     
-    const firstUserInfo = await fightersRepository.find("username", users.firstUser)
-    if(!firstUserInfo) fightersRepository.insert(users.firstUser)
-    const secondUserInfo = await fightersRepository.find("username", users.secondUser)
-    if(!secondUserInfo) fightersRepository.insert(users.secondUser)
+    initializeUserInDB(firstUser)
+    initializeUserInDB(secondUser)
     
-    if(firstUserStars > secondUserStars) {
-        fightersRepository.update(users.firstUser, "wins")
-        fightersRepository.update(users.secondUser, "losses")
-        
-        return {
-            winner: users.firstUser,
-            loser: users.secondUser,
-            draw: false
-        }
-    }
-    if(secondUserStars > firstUserStars) {
-        fightersRepository.update(users.firstUser, "losses")
-        fightersRepository.update(users.secondUser, "wins")
+    if(firstUserStars > secondUserStars) return userWin(firstUser, secondUser)
+    if(secondUserStars > firstUserStars) return userWin(secondUser, firstUser)
 
-        return {
-            winner: users.secondUser,
-            loser: users.firstUser,
-            draw: false
-        }
-    }
+    return draw(firstUser, secondUser)
+}
 
-    fightersRepository.update(users.firstUser, "draws")
-    fightersRepository.update(users.secondUser, "draws")
+async function initializeUserInDB(user: string){
+    const firstUserInfo = await fightersRepository.find("username", user)
+    if(!firstUserInfo) fightersRepository.insert(user)
+}
+
+async function userWin(winner: string, loser:string){
+    fightersRepository.update(winner, "wins")
+    fightersRepository.update(loser, "losses")
+    
+    return {
+        winner,
+        loser,
+        draw: false
+    }
+}
+
+async function draw(firstUser: string, secondUser: string){
+    fightersRepository.update(firstUser, "draws")
+    fightersRepository.update(secondUser, "draws")
 
     return {
         winner: null,

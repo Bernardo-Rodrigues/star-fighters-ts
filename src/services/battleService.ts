@@ -1,5 +1,5 @@
 import * as fightersRepository from "../repositories/fightersRepository.js"
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 export interface Users {
     firstUser: string;
@@ -47,7 +47,7 @@ function draw(firstUser: string, secondUser: string){
 }
 
 async function getUserStars(user: string){
-    const { data: userRepos} = await axios.get(`https://api.github.com/users/${user}/repos`)
+    const { data: userRepos } = await axios.get<AxiosResponse[]>(`https://api.github.com/users/${user}/repos`)
     const userStars: number = userRepos.reduce( (acc: any, cur: any) => acc + cur?.stargazers_count, 0)
 
     return userStars

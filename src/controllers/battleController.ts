@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import * as battleService from "../services/battleService.js"
+import battleService, { Users } from "../services/battleService.js"
 
 export async function doBattle(req: Request, res: Response){
-    const users = req.body;
+    const users: Users = req.body;
 
     const result = await battleService.doBattle(users);
 

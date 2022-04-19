@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express"
+import Joi from "joi"
 import { stripHtml } from "string-strip-html"
 import UnprocessableEntity from "../errors/UnprocessableEntity.js"
 import battleSchema from "../schemas/battleSchema.js"
@@ -13,7 +14,7 @@ const schemas = {
 
 export default async function validateSchemaMiddleware(req: Request, res: Response, next: NextFunction){
     const { body } = req
-    const schema = schemas["/"+req.path.split("/")[1]]
+    const schema: Joi.ObjectSchema = schemas["/"+req.path.split("/")[1]]
     
     Object.keys(body).forEach( key => {
         if(typeof(body[key]) === "string") body[key] = sanitizeString(body[key])

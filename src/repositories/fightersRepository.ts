@@ -1,7 +1,14 @@
 import connection from "../db.js";
 
+interface UserRank {
+    username: string;
+    wins: number;
+    losses: number;
+    draws: number;
+}
+
 export async function list (){
-    const { rows: fighters } = await connection.query(`
+    const { rows: fighters } = await connection.query<UserRank>(`
         SELECT  username, wins, losses, draws 
           FROM  fighters 
       ORDER BY  wins DESC, draws DESC
@@ -23,8 +30,8 @@ export async function insert(username: string){
     return true;
 }
 
-export async function find(column: string, value: any){
-    const { rows: [fighter]} = await connection.query(`
+export async function find(column: string, value: string){
+    const { rows: [fighter]} = await connection.query<UserRank>(`
         SELECT  * 
           FROM  fighters 
          WHERE  ${column} = $1

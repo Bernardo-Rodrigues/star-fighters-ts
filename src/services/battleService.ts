@@ -1,7 +1,12 @@
 import * as fightersRepository from "../repositories/fightersRepository.js"
-import getUserStars from "../utils/getUserStars.js";
+import axios from "axios";
 
-export async function doBattle({firstUser, secondUser}){
+export interface Users {
+    firstUser: string;
+    secondUser: string;
+}
+
+async function doBattle({firstUser, secondUser}: Users){
     const firstUserStars = await getUserStars(firstUser);
     const secondUserStars = await getUserStars(secondUser);
     
@@ -19,7 +24,7 @@ async function initializeUserInDB(user: string){
     if(!firstUserInfo) fightersRepository.insert(user)
 }
 
-async function userWin(winner: string, loser:string){
+function userWin(winner: string, loser:string){
     fightersRepository.update(winner, "wins")
     fightersRepository.update(loser, "losses")
     
@@ -30,7 +35,7 @@ async function userWin(winner: string, loser:string){
     }
 }
 
-async function draw(firstUser: string, secondUser: string){
+function draw(firstUser: string, secondUser: string){
     fightersRepository.update(firstUser, "draws")
     fightersRepository.update(secondUser, "draws")
 
@@ -39,4 +44,15 @@ async function draw(firstUser: string, secondUser: string){
         loser: null,
         draw: true
     }
+}
+
+async function getUserStars(user: string){
+    const { data: userRepos} = await axios.get(`https://api.github.com/users/${user}/repos`)
+    const userStars: number = userRepos.reduce( (acc: any, cur: any) => acc + cur?.stargazers_count, 0)
+
+    return userStars
+}
+
+export default {
+    doBattle
 }
